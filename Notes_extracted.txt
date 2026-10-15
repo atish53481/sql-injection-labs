@@ -1,0 +1,131 @@
+ 
+SQL Injection is a web security appl vul that allows attacker to interfere with queries into application that make the connection with database. An attacker view the data, those data can’t retrieve by normally. The data might include other user data, other data that app access. There might be chances is there attacker can modify or delete those data.
+Some cases SQL injection attack get hacked with backend then DOS attack (Denial of service) is possible
+ 
+What is the impact of a successful SQL injection attack?
+A successful SQL injection attack can result in unauthorized access to sensitive data, such as: 
+Passwords. 
+Credit card details. 
+Personal user information. 
+SQL injection is used in many high-profile data breaches that causes the reputation damage & regulatory fines. In some cases, an attacker can obtain a persistent backdoor into an organization's systems, leading to a long-term compromise that can go unnoticed for an extended period. 
+ 
+How to detect SQL injection vulnerabilities
+You can detect SQL injection manually using a systematic set of tests against every entry point in the application:
+ 
+' single quote character look for error (an error occurs then there is chance of SQLi)
+Boolean conditions such as OR 1=1 and OR 1=2, and look for differences in the application's responses. 
+Some SQL-specific syntax that evaluates to the base (original) value of the entry point, and to a different value, and look for systematic differences in the application responses. 
+Payloads designed to trigger time delays when executed within a SQL query, and look for differences in the time taken to respond. 
+OAST payloads designed to trigger an out-of-band network interaction when executed within a SQL query, and monitor any resulting interactions. 
+ 
+ 
+Means
+' look for error (Generally 500 internal server error)
+Vanilla injection attack, Boolean condition as 1=1 OR 1=2 and look for app Response
+Apply the SQL syntax to entry point & look for responses in app
+Apply the Payload designed to trigger time delays & look app time respond
+OAST payloads designed to trigger an out-of-band network interaction when executed within a SQL query, and monitor any resulting interactions. 
+ 
+ 
+SQL injection examples
+There are lots of SQL injection vulnerabilities, attacks, and techniques, that occur in different situations. Some common SQL injection examples include: 
+Retrieving hidden data, where you can modify a SQL query to return additional results.
+Subverting application logic, where you can change a query to interfere with the application's logic.
+UNION attacks, where you can retrieve data from different database tables.
+Blind SQL injection, where the results of a query you control are not returned in the application's responses.
+Retrieving hidden data
+Imagine a shopping application that displays products in different categories. When the user clicks on the Gifts category, their browser requests the URL: 
+https://insecure-website.com/products?category=Gifts
+This causes the application to make a SQL query to retrieve details of the relevant products from the database: 
+SELECT * FROM products WHERE category = 'Gifts' AND released = 1
+This SQL query asks the database to return: 
+all details (*) 
+from the products table 
+where the category is Gifts 
+and released is 1. 
+The restriction released = 1 is being used to hide products that are not released. We could assume for unreleased products, released = 0. 
+The application doesn't implement any defenses against SQL injection attacks. This means an attacker can construct the following attack, for example: 
+https://insecure-website.com/products?category=Gifts'--
+This results in the SQL query: 
+SELECT * FROM products WHERE category = 'Gifts'--' AND released = 1
+Crucially, note that -- is a comment indicator in SQL. This means that the rest of the query is interpreted as a comment, effectively removing it. In this example, this means the query no longer includes AND released = 1. As a result, all products are displayed, including those that are not yet released. 
+You can use a similar attack to cause the application to display all the products in any category, including categories that they don't know about: 
+https://insecure-website.com/products?category=Gifts'+OR+1=1--
+This results in the SQL query: 
+SELECT * FROM products WHERE category = 'Gifts' OR 1=1--' AND released = 1
+The modified query returns all items where either the category is Gifts, or 1 is equal to 1. As 1=1 is always true, the query returns all items. 
+ 
+Lab-01 : Retrieving hidden data
+SQL Injection - product cateogory filter
+Select * from products wher category = 'Gifts' and released =1
+End Goal : Display all products both released and unreleased 
+ 
+Analysis:
+ 
+Put ' if we are getting the error means we are  sql injection is possible
+ 
+Select * from products where category ='Pets' and released =1
+Select * from products where category ='' and released =1
+Select * from products where category ='--'' and released =1
+Select * from products where category =''
+Select * from products where category ='' or 1=1 --'  and released =1
+ 
+ 
+Subverting application logic
+Imagine an application that lets users log in with a username and password. If a user submits the username wiener and the password bluecheese, the application checks the credentials by performing the following SQL query: 
+SELECT * FROM users WHERE username = 'wiener' AND password = 'bluecheese'
+If the query returns the details of a user, then the login is successful. Otherwise, it is rejected. 
+In this case, an attacker can log in as any user without the need for a password. They can do this using the SQL comment sequence -- to remove the password check from the WHERE clause of the query. For example, submitting the username administrator'-- and a blank password results in the following query: 
+SELECT * FROM users WHERE username = 'administrator'--' AND password = ''
+This query returns the user whose username is administrator and successfully logs the attacker in as that user. 
+ 
+ 
+ 
+ 
+Lab-02 : Subverting application logic
+SQL Injection - Login Functionality 
+End Goal - Perform SQLi attack and log in as the administrator user.
+ 
+Analysis
+ 
+SELECT firstname FROM users where username='admin' and password='admin'
+SELECT firstname FROM users where username=''' and password='admin'
+SELECT firstname FROM users where username='admin'--' and password='admin'
+SELECT firstname FROM users where username='admin'  
+ 
+
+
+
+
+
+
+
+
+ 
+ 
+SQL injection in different contexts
+ 
+ 
+In the previous labs, you used the query string to inject your malicious SQL payload. However, you can perform SQL injection attacks using any controllable input that is processed as a SQL query by the application. For example, some websites take input in JSON or XML format and use this to query the database. 
+These different formats may provide different ways for you to obfuscate attacks that are otherwise blocked due to WAFs and other defense mechanisms. Weak implementations often look for common SQL injection keywords within the request, so you may be able to bypass these filters by encoding or escaping characters in the prohibited keywords. For example, the following XML-based SQL injection uses an XML escape sequence to encode the S character in SELECT: 
+<stockCheck> <productId>123</productId> <storeId>999 &#x53;ELECT * FROM information_schema.tables</storeId> </stockCheck>
+This will be decoded server-side before being passed to the SQL interpreter. 
+ 
+ 
+Lab #17: SQL injection with filter bypass via XML encoding
+ 
+Vul app : SQL injection vulnerability in its stock check feature. Can use a UNION attack to retrieve data from other tables. 
+ 
+Goal: contains a users table, which contains the usernames and passwords of registered users.
+How to prevent SQL injection
+ou can prevent most instances of SQL injection using parameterized queries instead of string concatenation within the query. These parameterized queries are also known as "prepared statements". 
+The following code is vulnerable to SQL injection because the user input is concatenated directly into the query: 
+String query = "SELECT * FROM products WHERE category = '"+ input + "'"; Statement statement = connection.createStatement(); ResultSet resultSet = statement.executeQuery(query);
+You can rewrite this code in a way that prevents the user input from interfering with the query structure: 
+PreparedStatement statement = connection.prepareStatement("SELECT * FROM products WHERE category = ?"); statement.setString(1, input); ResultSet resultSet = statement.executeQuery();
+You can use parameterized queries for any situation where untrusted input appears as data within the query, including the WHERE clause and values in an INSERT or UPDATE statement. They can't be used to handle untrusted input in other parts of the query, such as table or column names, or the ORDER BY clause. Application functionality that places untrusted data into these parts of the query needs to take a different approach, such as: 
+Whitelisting permitted input values. 
+Using different logic to deliver the required behavior. 
+For a parameterized query to be effective in preventing SQL injection, the string that is used in the query must always be a hard-coded constant. It must never contain any variable data from any origin. Do not be tempted to decide case-by-case whether an item of data is trusted, and continue using string concatenation within the query for cases that are considered safe. It's easy to make mistakes about the possible origin of data, or for changes in other code to taint trusted data. 
+ 
+ 

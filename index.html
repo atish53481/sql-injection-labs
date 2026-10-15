@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SQL Injection Academy - Interactive Learning Dashboard</title>
+    <meta name="description" content="An interactive PortSwigger-style SQL Injection laboratory for learning web application security, complete with simulated databases, a live query debugger, and step-by-step guidance for beginners.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Canvas for Confetti solved particles -->
+    <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+
+    <!-- App container for side navigation layout -->
+    <div class="app-container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-logo">SQLi</div>
+                <div class="brand-name">Academy</div>
+            </div>
+            
+            <nav>
+                <div class="nav-section-title">Navigation</div>
+                <ul class="nav-menu">
+                    <li class="nav-item active" data-route="home">
+                        <i class="icon-book"></i> Dashboard
+                    </li>
+                </ul>
+                
+                <div class="nav-section-title">Labs</div>
+                <ul class="nav-menu">
+                    <li class="nav-item" data-route="lab1">
+                        <i class="icon-db"></i> Lab 1: Hidden Data
+                        <span class="lab-badge">Lab</span>
+                    </li>
+                    <li class="nav-item" data-route="lab2">
+                        <i class="icon-lock"></i> Lab 2: Login Bypass
+                        <span class="lab-badge">Lab</span>
+                    </li>
+                    <li class="nav-item" data-route="lab3">
+                        <i class="icon-shield"></i> Lab 3: XML WAF Bypass
+                        <span class="lab-badge">Lab</span>
+                    </li>
+                </ul>
+                
+                <div class="nav-section-title">Defenses</div>
+                <ul class="nav-menu">
+                    <li class="nav-item" data-route="prevention">
+                        <i class="icon-check"></i> Prevention Sandbox
+                    </li>
+                </ul>
+            </nav>
+            
+            <!-- Global App Settings Panel -->
+            <div class="settings-panel">
+                <div class="toggle-container">
+                    <div>
+                        <span class="toggle-label-sub">Learning Mode</span>
+                        <span class="toggle-label eli5-toggle-label" style="font-weight: 600;">ELI5: Disabled ⚙️</span>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="eli5-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Main Content Panel -->
+        <main class="main-content">
+
+            <!-- Education-only disclaimer banner (always visible) -->
+            <div class="edu-banner" role="alert">
+                <span class="edu-banner-icon">⚠️</span>
+                <div class="edu-banner-text">
+                    <strong>Strongly Recommended — This lab is only for Education Purpose. Don't Misuse it.</strong>
+                </div>
+            </div>
+
+            <!-- Dashboard Top Header -->
+            <header class="top-header">
+                <div class="welcome-msg">
+                    <h1>SQL Injection Training Center</h1>
+                    <p>Learn how databases get hacked, why queries break, and how to write secure code.</p>
+                </div>
+                
+                <!-- Progress widget -->
+                <div class="progress-widget">
+                    <div class="progress-info">
+                        <span>Academy Status</span>
+                        <h4 id="progress-text">0 / 3 Solved</h4>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- PAGE 1: Dashboard Home -->
+            <div id="home-page" class="page-container active">
+                <div class="dashboard-grid">
+                    <!-- Welcome Jumbotron -->
+                    <section class="welcome-banner">
+                        <div class="banner-content">
+                            <h2>Welcome to the SQLi Sandbox</h2>
+                            <p>This sandbox simulates a vulnerability scanner, web application firewall (WAF), and a live SQL database query compiler. Toggle <strong>ELI5 Mode</strong> in the sidebar to switch explanations to simple, kid-friendly analogies!</p>
+                            <button class="banner-btn" data-navigate="lab1">Begin Lab 1: Retrieving Hidden Data</button>
+                        </div>
+                    </section>
+                    
+                    <!-- Labs Directory List -->
+                    <div class="labs-grid" style="grid-column: span 2;">
+                        <!-- Lab 1 Card -->
+                        <div class="card lab-card" id="card-lab1">
+                            <div class="lab-header">
+                                <div class="lab-num">Lab-01</div>
+                                <h3 class="lab-title">Retrieving Hidden Data</h3>
+                                <p class="lab-desc">An online shopping filter query concatenates user inputs directly. Exploit it to show all products, including items that are hidden/unreleased.</p>
+                            </div>
+                            <div class="lab-footer">
+                                <span class="lab-difficulty diff-easy">Easy</span>
+                                <button class="lab-btn" data-navigate="lab1">Start Lab</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Lab 2 Card -->
+                        <div class="card lab-card" id="card-lab2">
+                            <div class="lab-header">
+                                <div class="lab-num">Lab-02</div>
+                                <h3 class="lab-title">Subverting Application Logic</h3>
+                                <p class="lab-desc">A portal login query verifies usernames and passwords insecurely. Craft an exploit to log in as the administrator user without a password.</p>
+                            </div>
+                            <div class="lab-footer">
+                                <span class="lab-difficulty diff-easy">Easy</span>
+                                <button class="lab-btn" data-navigate="lab2">Start Lab</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Lab 3 Card -->
+                        <div class="card lab-card" id="card-lab3">
+                            <div class="lab-header">
+                                <div class="lab-num">Lab-03</div>
+                                <h3 class="lab-title">XML WAF Bypass</h3>
+                                <p class="lab-desc">A stock checking engine accepts XML parameters but runs a WAF block list. Bypass the firewall using XML entity encoding to dump user password data.</p>
+                            </div>
+                            <div class="lab-footer">
+                                <span class="lab-difficulty diff-medium">Medium</span>
+                                <button class="lab-btn" data-navigate="lab3">Start Lab</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PAGE 2: Lab 1 (Retrieving Hidden Data) -->
+            <div id="lab1-page" class="page-container">
+                <div class="lab-workspace">
+                    <!-- Left: Instructions -->
+                    <div class="instruction-pane">
+                        <div class="guide-tabs">
+                            <button class="guide-tab-btn active">Instructions & Walkthrough</button>
+                        </div>
+                        <div class="guide-content" id="lab1-guide-content">
+                            <!-- Populated dynamically via app.js -->
+                        </div>
+                        
+                        <!-- Helper Payloads Panel -->
+                        <div class="payloads-card card">
+                            <div class="card-title"><i class="icon-play"></i> Attack Payloads Sandbox</div>
+                            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Click any payload to inject it directly into the filter query:</p>
+                            <div class="payload-list" id="lab1-payloads">
+                                <div class="payload-item">
+                                    <span class="payload-code">'</span>
+                                    <span class="payload-label">Trigger Error</span>
+                                </div>
+                                <div class="payload-item">
+                                    <span class="payload-code">Pets'--</span>
+                                    <span class="payload-label">Comment Comment</span>
+                                </div>
+                                <div class="payload-item">
+                                    <span class="payload-code">Gifts' OR 1=1--</span>
+                                    <span class="payload-label">Always True (OR 1=1)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Browser & Query debugger -->
+                    <div class="simulation-pane">
+                        <!-- Simulated Web Browser -->
+                        <div class="browser-mockup">
+                            <div class="browser-bar">
+                                <div class="browser-dots">
+                                    <div class="browser-dot close"></div>
+                                    <div class="browser-dot minimize"></div>
+                                    <div class="browser-dot maximize"></div>
+                                </div>
+                                <div class="browser-address">
+                                    <span class="protocol">https://</span><span class="domain">cyber-store.com</span><span class="url-path">/products?category=</span><span id="l1-url-param" class="url-param-inject" contenteditable="true" spellcheck="false" title="Click here to type your SQL injection payload, then press Enter">Gifts</span>
+                                </div>
+                            </div>
+                            
+                            <div class="browser-body">
+                                <div class="shop-container">
+                                    <div class="shop-header">
+                                        <div class="shop-title">🛍️ Cyber Store</div>
+                                        <div class="shop-filter">
+                                            <label for="l1-category-select" style="font-size:13px; font-weight:600;">Category:</label>
+                                            <select id="l1-category-select" class="shop-select">
+                                                <option value="Gifts">Gifts</option>
+                                                <option value="Pets">Pets</option>
+                                                <option value="Tech">Tech</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Injection Input Box -->
+                                    <div class="injection-input-box">
+                                        <label for="l1-custom-input" class="injection-label">🔧 Type your SQL injection payload below:</label>
+                                        <div class="injection-input-row">
+                                            <input type="text" id="l1-custom-input" class="injection-text-input" placeholder="e.g. Gifts' OR 1=1--" spellcheck="false" autocomplete="off">
+                                            <button id="l1-inject-btn" class="injection-go-btn">Inject →</button>
+                                        </div>
+                                        <div class="injection-hint">💡 Try: <code>Gifts'--</code> or <code>Gifts' OR 1=1--</code> to bypass the filter</div>
+                                    </div>
+                                    
+                                    <!-- Dynamic Products list -->
+                                    <div id="l1-products" class="products-grid">
+                                        <!-- Rendered dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Live SQL Query Debugger Console -->
+                        <div class="debugger-console card">
+                            <div class="console-title-row">
+                                <h3><i class="icon-db"></i> Live SQL Execution Monitor</h3>
+                                <div class="status-indicator">
+                                    <span class="indicator-dot active"></span> DATABASE ON
+                                </div>
+                            </div>
+                            
+                            <p style="font-size:12.5px; color:var(--text-muted);">This is the actual query generated server-side. Note the <span style="color:#fda4af; font-weight:600;">injected input (red highlight)</span> and <span style="text-decoration:line-through; opacity:0.6;">commented out clauses (grey strikethrough)</span>.</p>
+                            
+                            <div class="sql-query-view" id="l1-sql-query">
+                                <!-- Rendered dynamically -->
+                            </div>
+                            
+                            <!-- SQL error warning banner -->
+                            <div class="sql-error-message" id="l1-sql-error"></div>
+                            
+                            <!-- Database Table Visual representation -->
+                            <div class="db-table-visualizer">
+                                <h4>
+                                    <span>🗄️ Database Table View: <code>products</code></span>
+                                    <span id="l1-rows-count">9 rows returned</span>
+                                </h4>
+                                <div class="db-table-scroll" id="l1-db-table-body">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PAGE 3: Lab 2 (Subverting Logic - Login) -->
+            <div id="lab2-page" class="page-container">
+                <div class="lab-workspace">
+                    <!-- Left: Instructions -->
+                    <div class="instruction-pane">
+                        <div class="guide-tabs">
+                            <button class="guide-tab-btn active">Instructions & Walkthrough</button>
+                        </div>
+                        <div class="guide-content" id="lab2-guide-content">
+                            <!-- Populated dynamically -->
+                        </div>
+                        
+                        <!-- Payloads list -->
+                        <div class="payloads-card card">
+                            <div class="card-title"><i class="icon-play"></i> Attack Payloads Sandbox</div>
+                            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Click any username injection payload to input it:</p>
+                            <div class="payload-list" id="lab2-payloads">
+                                <div class="payload-item">
+                                    <span class="payload-code">admin'</span>
+                                    <span class="payload-label">Trigger Error</span>
+                                </div>
+                                <div class="payload-item">
+                                    <span class="payload-code">administrator'--</span>
+                                    <span class="payload-label">Comment Password</span>
+                                </div>
+                                <div class="payload-item">
+                                    <span class="payload-code">' OR 1=1--</span>
+                                    <span class="payload-label">Bypass as first user</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Portal & Query debugger -->
+                    <div class="simulation-pane">
+                        <!-- Simulated Web Browser -->
+                        <div class="browser-mockup">
+                            <div class="browser-bar">
+                                <div class="browser-dots">
+                                    <div class="browser-dot close"></div>
+                                    <div class="browser-dot minimize"></div>
+                                    <div class="browser-dot maximize"></div>
+                                </div>
+                                <div class="browser-address">
+                                    <span class="protocol">https://</span><span class="domain">secure-login.com</span><span class="url-path">/login</span>
+                                </div>
+                            </div>
+                            
+                            <div class="browser-body">
+                                <!-- Simulated Login Form -->
+                                <div id="l2-login-container" class="login-card-sim">
+                                    <h3>Login Portal</h3>
+                                    <form id="l2-login-form">
+                                        <div class="form-group">
+                                            <label for="l2-username">Username:</label>
+                                            <input type="text" id="l2-username" class="form-input" placeholder="e.g. wiener" required autocomplete="off">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="l2-password">Password:</label>
+                                            <input type="password" id="l2-password" class="form-input" placeholder="••••••••" autocomplete="off">
+                                        </div>
+                                        <button type="submit" class="login-btn">Log In</button>
+                                    </form>
+                                </div>
+                                
+                                <!-- Logged in Profile display -->
+                                <div id="l2-profile-container" class="logged-in-profile" style="display:none;">
+                                    <div class="avatar-badge">👤</div>
+                                    <h2>Welcome back, <span id="l2-logged-in-user" style="color:var(--color-primary);">administrator</span>!</h2>
+                                    <span class="profile-role" id="l2-profile-role">Administrator</span>
+                                    <div style="margin-top: 12px; color:var(--color-success); font-weight:600;">🎉 SUCCESSFUL AUTHENTICATION BYPASS!</div>
+                                    <div><button id="l2-logout-btn" class="profile-logout">Log Out</button></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- SQL Monitor Console -->
+                        <div class="debugger-console card">
+                            <div class="console-title-row">
+                                <h3><i class="icon-db"></i> Live SQL Execution Monitor</h3>
+                                <div class="status-indicator">
+                                    <span class="indicator-dot active"></span> DATABASE ON
+                                </div>
+                            </div>
+                            
+                            <div class="sql-query-view" id="l2-sql-query">
+                                <!-- Populated dynamically -->
+                            </div>
+                            
+                            <div class="sql-error-message" id="l2-sql-error"></div>
+                            
+                            <!-- Database Table Visual representation -->
+                            <div class="db-table-visualizer">
+                                <h4>
+                                    <span>🗄️ Database Table View: <code>users</code></span>
+                                </h4>
+                                <div class="db-table-scroll" id="l2-db-table-body">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PAGE 4: Lab 3 (XML Stock check bypass) -->
+            <div id="lab3-page" class="page-container">
+                <div class="lab-workspace">
+                    <!-- Left: Instructions -->
+                    <div class="instruction-pane">
+                        <div class="guide-tabs">
+                            <button class="guide-tab-btn active">Instructions & Walkthrough</button>
+                        </div>
+                        <div class="guide-content" id="lab3-guide-content">
+                            <!-- Populated dynamically -->
+                        </div>
+                        
+                        <!-- Payloads list -->
+                        <div class="payloads-card card">
+                            <div class="card-title"><i class="icon-play"></i> Attack Payloads Sandbox</div>
+                            <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Click to inject into <code>&lt;storeId&gt;</code> element:</p>
+                            <div class="payload-list" id="lab3-payloads">
+                                <div class="payload-item">
+                                    <span class="payload-code">2'</span>
+                                    <span class="payload-label">Inject quote</span>
+                                </div>
+                                <div class="payload-item">
+                                    <span class="payload-code">2 UNION SELECT password FROM users--</span>
+                                    <span class="payload-label">Plain Union (WAF block)</span>
+                                </div>
+                                <div class="payload-item">
+                                    <span class="payload-code">2 &amp;#x55;&amp;#x4e;&amp;#x49;&amp;#x4f;&amp;#x4e; &amp;#x53;&amp;#x45;&amp;#x4c;&amp;#x45;&amp;#x43;&amp;#x54; NULL, username, password, NULL, NULL, NULL FROM users--</span>
+                                    <span class="payload-label">Bypass Select (XML entity)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Right: Web Browser / XML input & WAF -->
+                    <div class="simulation-pane">
+                        <!-- Browser Frame -->
+                        <div class="browser-mockup">
+                            <div class="browser-bar">
+                                <div class="browser-dots">
+                                    <div class="browser-dot close"></div>
+                                    <div class="browser-dot minimize"></div>
+                                    <div class="browser-dot maximize"></div>
+                                </div>
+                                <div class="browser-address">
+                                    <span class="protocol">https://</span><span class="domain">secure-shop.com</span><span class="url-path">/product/stock</span>
+                                </div>
+                            </div>
+                            
+                            <div class="browser-body">
+                                <div class="stock-check-sim">
+                                    <h3 style="font-size:15px; margin-bottom:12px; color:var(--color-primary);">📦 Product Stock Checker</h3>
+                                    
+                                    <div class="form-group" style="margin-bottom:10px;">
+                                        <label for="l3-xml-input">Outgoing Request XML Payload:</label>
+                                        <textarea id="l3-xml-input" class="xml-textarea" spellcheck="false"></textarea>
+                                    </div>
+                                    
+                                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                                        <div style="font-size:11px; color:var(--text-muted);">Edit the XML above to inject SQL instructions.</div>
+                                        <button id="l3-check-btn" class="login-btn" style="width:auto; margin:0; padding:6px 14px; font-size:12px;">Check Stock</button>
+                                    </div>
+                                    
+                                    <div style="margin-top:16px;">
+                                        <label style="display:block; font-size:11px; color:var(--text-muted); margin-bottom:4px;">Server response:</label>
+                                        <div class="stock-response-box" id="l3-stock-response">
+                                            Stock level will display here.
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Interactive XML Encoder Utility -->
+                                    <div class="xml-encoder-panel">
+                                        <h4>🔧 Quick XML Entity Encoder Tool</h4>
+                                        <div class="xml-encoder-flex">
+                                            <input type="text" id="l3-encode-input" class="form-input" style="padding:6px; font-size:12px;" placeholder="Type words like: SELECT" value="SELECT">
+                                            <button id="l3-encode-btn" class="login-btn" style="width:auto; margin:0; padding:6px 10px; font-size:11px;">Encode Hex</button>
+                                        </div>
+                                        <input type="text" id="l3-encode-output" class="form-input" style="padding:6px; font-size:11px; margin-top:8px; font-family:var(--font-mono); color:var(--color-success);" readonly placeholder="Result entities: &#x53;&#x45;...">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- WAF and SQL logs panel -->
+                        <div class="card" style="padding: 16px 20px; border-color: rgba(245,158,11,0.25);">
+                            <div class="card-title" style="font-size:13px; color:var(--color-warning); margin-bottom:8px;">🛡️ Web Application Firewall (WAF) Inspection Logs</div>
+                            <pre id="l3-waf-logs" style="font-family:var(--font-mono); font-size:11.5px; background:var(--color-code-bg); padding:10px; border-radius:4px; line-height:1.4; overflow-x:auto;">Idle. Click Check Stock...</pre>
+                        </div>
+                        
+                        <!-- SQL Monitor Console -->
+                        <div class="debugger-console card">
+                            <div class="console-title-row">
+                                <h3><i class="icon-db"></i> Live SQL Execution Monitor</h3>
+                                <div class="status-indicator">
+                                    <span class="indicator-dot active"></span> DATABASE ON
+                                </div>
+                            </div>
+                            
+                            <div class="sql-query-view" id="l3-sql-query">
+                                <!-- Populated dynamically -->
+                            </div>
+                            
+                            <div class="sql-error-message" id="l3-sql-error"></div>
+                            
+                            <div class="db-table-visualizer">
+                                <h4>
+                                    <span>🗄️ Database Table View: <code>store_stocks</code></span>
+                                </h4>
+                                <div class="db-table-scroll" id="l3-db-table-body">
+                                    <!-- Rendered dynamically -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- PAGE 5: Prevention & Parameterized Sandbox -->
+            <div id="prevention-page" class="page-container">
+                <div class="card" style="margin-bottom: 24px;">
+                    <h2 style="font-size:22px; color:var(--color-success); margin-bottom:8px;">How to Stop SQL Injection</h2>
+                    <p style="font-size:14px; color:var(--text-muted); line-height:1.6;">The absolute best way to prevent SQL Injection is by using <strong>parameterized queries</strong> (also known as <strong>Prepared Statements</strong>). When you use prepared statements, the database treats user inputs strictly as safe text strings, and never compiles them as executable code instructions.</p>
+                </div>
+                
+                <div class="card" style="margin-bottom: 24px;">
+                    <div class="card-title"><i class="icon-play"></i> Compare SQL Compilers In Real-Time</div>
+                    <p style="font-size:13.5px; color:var(--text-muted); margin-bottom:12px;">Type an injection string below and click test. See how vulnerable dynamic SQL compilers run it, while parameterized statements isolate and neutralize it completely.</p>
+                    
+                    <div style="display:flex; gap:12px; align-items:center; margin-bottom:16px;">
+                        <input type="text" id="sandbox-input" class="form-input" style="max-width:400px; font-family:var(--font-mono); color:var(--color-primary);" placeholder="e.g. Gifts' OR 1=1--" value="Gifts' OR 1=1--">
+                        <button id="test-sandbox-btn" class="login-btn" style="width:auto; margin:0; padding:10px 20px;">Test Compiler Output</button>
+                    </div>
+                    
+                    <div class="prevention-comparison">
+                        <!-- Left: Vulnerable Dynamic Query -->
+                        <div class="code-editor-box">
+                            <div class="editor-header">
+                                <span class="editor-title" style="color:var(--color-error);"><i class="icon-alert"></i> Insecure Dynamic Concatenation</span>
+                                <span class="lang-tag">Java</span>
+                            </div>
+                            <div class="editor-content">
+<pre>
+String query = "SELECT * FROM products WHERE category = '" + input + "' AND released = 1";
+Statement stmt = connection.createStatement();
+ResultSet rs = stmt.executeQuery(query);
+</pre>
+                            </div>
+                            
+                            <div style="padding:16px; background:rgba(239, 68, 68, 0.05); border-top:1px solid rgba(239, 68, 68, 0.15);">
+                                <div style="font-size:11px; text-transform:uppercase; font-weight:700; color:var(--color-error); margin-bottom:4px;">COMPILED DATABASE QUERY:</div>
+                                <div id="sandbox-query-vuln" class="sql-query-view" style="font-size:12px; padding:10px; margin-bottom:8px;"></div>
+                                <div id="sandbox-output-vuln" style="font-size:12.5px; line-height:1.4;"></div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Secure Prepared Statement -->
+                        <div class="code-editor-box">
+                            <div class="editor-header">
+                                <span class="editor-title" style="color:var(--color-success);"><i class="icon-check"></i> Secure Parameterized Statement</span>
+                                <span class="lang-tag">Java</span>
+                            </div>
+                            <div class="editor-content">
+<pre>
+PreparedStatement stmt = connection.prepareStatement(
+    "SELECT * FROM products WHERE category = ? AND released = 1"
+);
+stmt.setString(1, input);
+ResultSet rs = stmt.executeQuery();
+</pre>
+                            </div>
+                            
+                            <div style="padding:16px; background:rgba(16, 185, 129, 0.05); border-top:1px solid rgba(16, 185, 129, 0.15);">
+                                <div style="font-size:11px; text-transform:uppercase; font-weight:700; color:var(--color-success); margin-bottom:4px;">COMPILED DATABASE QUERY & BINDINGS:</div>
+                                <div id="sandbox-query-safe" class="sql-query-view" style="font-size:12px; padding:10px; margin-bottom:8px;"></div>
+                                <div id="sandbox-output-safe" style="font-size:12.5px; line-height:1.4;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Success Celebration Modal -->
+    <div class="success-overlay" id="success-overlay">
+        <div class="success-card">
+            <div class="success-icon">🏆</div>
+            <h2 id="success-title">Lab Solved!</h2>
+            <p id="success-msg">Congratulations! You successfully executed the SQL Injection exploit.</p>
+            <button id="success-next-btn" class="success-next-btn">Advance to Next Lab ➡️</button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="database.js"></script>
+    <script src="labs.js"></script>
+    <script src="app.js"></script>
+    <script src="sqli-labs-ext.js"></script>
+</body>
+</html>
